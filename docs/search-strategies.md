@@ -65,6 +65,50 @@ Never trust Google Translate alone for retail jargon. Never invent a Hebrew term
 
 ---
 
+## Official-importer vs parallel-import tracks
+
+Apply this section to **appliances, electronics, power tools, and other warranty-sensitive durable goods**. Skip it for groceries, clothing, books, inexpensive accessories, and ordinary consumables unless the user asks.
+
+Do not collapse all Israeli offers into one price table. Build three evidence-based buckets:
+
+1. **Official importer — `יבואן רשמי`**: the product page, manufacturer, or named importer explicitly says `יבואן רשמי`, `אחריות יבואן רשמי`, or identifies the brand-recognised Israeli importer. A large retailer name alone is not proof.
+2. **Parallel import — `יבוא מקביל`**: the listing explicitly says `יבוא מקביל`, `יבואן מקביל`, or clearly identifies an independent importer/warranty provider while disclaiming official import.
+3. **Unverified importer status**: vague phrases such as `יבואן מורשה`, `אחריות יבואן`, `אחריות על ידי החנות`, or a warranty-company name without an explicit official/parallel statement. Never translate `יבואן מורשה` into “official importer.” Keep these offers visible but outside strict official-vs-parallel parity calculations.
+
+For each offer capture:
+
+- all-in price, exact model/variant, bundle, VAT, and delivery;
+- importer classification plus the exact supporting wording and source;
+- warranty duration in months and named warranty/service provider;
+- whether the manufacturer recognises the warranty in Israel;
+- service method: in-home service, pickup/return, carry-in lab, or retailer-only handling;
+- material coverage differences: parts, labour, battery/motor/compressor/panel, accessories, exclusions, and years with reduced coverage;
+- seller rating/recent-review count separately from warranty-provider quality.
+
+Then produce two recommendation tracks plus an unverified appendix:
+
+### Official-import track
+
+Rank only eligible, destination-verified official-import offers. Show the cheapest recommended option and any meaningfully better service package.
+
+### Parallel-import track
+
+Rank only eligible, destination-verified parallel-import offers. Apply the same seller-rating and stock checks as the official track.
+
+### Price/warranty parity
+
+Compare like-for-like exact variants:
+
+- official premium in ILS: `official total - parallel total`;
+- official premium percentage: `(official - parallel) / parallel * 100`;
+- warranty-duration delta: `official months - parallel months`;
+- if the official warranty is longer, optional cost per extra warranty month: `official premium / extra months`;
+- qualitative service delta based only on documented terms or credible service-provider evidence.
+
+Do not assume official import is automatically longer or higher quality. If both tracks provide the same duration, say so. If service quality cannot be substantiated, label it `unknown` rather than treating “official” as a quality score. If one strict track has no eligible offer, say that parity cannot yet be calculated and optionally show an excluded-market reference separately.
+
+---
+
 ## Tier-1 Israeli tech retailers — Ivory / KSP / Bug / TMS
 
 The four mainstream tech chains. Used by `/tech-product-search`.
@@ -263,3 +307,4 @@ An IL markup of 30–40% is often still cheaper than importing once shipping + V
 - Use `browser_snapshot` over `browser_evaluate` for extracting product cards — more robust to DOM changes.
 - When a homepage search form isn't obviously matchable, fall back to trying common URL patterns (see category section) before giving up.
 - Never invent prices — if you can't extract one, say so.
+

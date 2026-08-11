@@ -22,6 +22,7 @@ Finds a consumer-tech product across the four tier-1 Israeli tech chains and ret
 3. **Retry** with a Hebrew synonym or brand+model only if a retailer returns zero.
 4. **KSP price rule:** quote the regular (non-Eilat) price unless the user asked about Eilat.
 5. **Rank low-to-high** by VAT-inclusive ILS price.
+6. **For warranty-sensitive electronics, split importer tracks** using `docs/search-strategies.md` § Official-importer vs parallel-import tracks. Show official and parallel-import options separately, keep ambiguous wording unclassified, and calculate price/warranty parity.
 
 ## Output
 
@@ -38,6 +39,7 @@ Backends used: Ivory=<tavily|playwright|…>, KSP=<…>, Bug=<…>, TMS=<…>
 - Any retailer that returned nothing and what fallbacks were tried.
 - Price outliers / stock warnings.
 - KSP: regular price quoted (Eilat price if seen: ₪X).
+- Official-vs-parallel premium, warranty-month delta, named service providers, and any documented service-quality difference (electronics/durable goods only).
 ```
 
 ## Rules
@@ -45,4 +47,6 @@ Backends used: Ivory=<tavily|playwright|…>, KSP=<…>, Bug=<…>, TMS=<…>
 - Never invent a price. If you can't extract it, say so.
 - Quote ILS inc-VAT — never USD on these retailers.
 - Never silently substitute a similar-but-different model. If the exact SKU isn't carried, name the closest match and flag it.
+- Never infer `יבואן רשמי` from the retailer name or from `יבואן מורשה`; require explicit evidence and keep ambiguous offers unclassified.
 - For retailers outside this set, point the user to `/general-search` or `/search-zap`.
+
