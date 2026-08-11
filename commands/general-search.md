@@ -28,7 +28,7 @@ For most cross-retailer price comparison, try `/search-zap` first. Come here whe
    - **Category-dispatch** — filter merged store list by matching `categories[]`; pick up to 8 stores; search each.
    - **Google IL** — patterns from strategies doc (`"brand model" site:.il`, `מחיר <hebrew>`, Google Shopping IL).
 5. **Rank low-to-high** by VAT-inclusive ILS price. Cap 5 per retailer / 3 per niche store.
-6. **For appliances/electronics, split importer tracks** using `docs/search-strategies.md` § Official-importer vs parallel-import tracks. Compare like-for-like official and parallel-import offers, warranty length/provider, and documented service quality; keep ambiguous wording unclassified.
+6. **For warranty-sensitive durable goods, split importer tracks** using `docs/search-strategies.md` § Official-importer vs parallel-import tracks. This includes appliances, electronics, power tools, and similar products. Compare like-for-like official and parallel-import offers, warranty length/provider, and documented service quality; keep ambiguous wording unclassified.
 7. **Flag retailers not in the merged store list** — candidates for `/add-store`.
 
 ## Output
@@ -46,7 +46,7 @@ Stores/sources searched: {n}
 - Retailers not in merged store list (candidates to add): ...
 - Retailers that returned nothing / errored: ...
 - Out-of-category misses: ...
-- Official-vs-parallel price premium, warranty-month delta, and service-quality evidence for appliances/electronics.
+- Official-vs-parallel price premium, warranty-month delta, and service-quality evidence for warranty-sensitive durable goods.
 ```
 
 ## Rules

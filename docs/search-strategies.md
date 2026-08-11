@@ -186,15 +186,28 @@ Playwright required — Zap has bot detection, Tavily snapshots are stale and mi
 1. Resolve Hebrew term (preflight).
 2. Navigate to keyword search with the Hebrew query.
 3. Find the right model — Zap groups by SKU. If unsure between multiple matches, list the top 3 and confirm with user.
-4. Open the model page. Extract the vendor table: vendor name, ILS price (verify VAT-inclusive), delivery info, link.
-5. Check for Eilat / ex-VAT badges on unusually low prices — use the regular price.
-6. Rank low-to-high. Cap at 10 vendors unless asked.
+4. Open the model page and extract **every** vendor row, not only initially visible cards. Capture vendor, product price, delivery charge/condition, rating, recent and total review counts, placement badges, warranty metadata, and the destination link.
+5. Detect non-neutral placement from visible text, accessibility labels, badges, classes, and surrounding containers. Treat `zap choice`, `ממומן`, `מקודם`, `מודעה`, `Sponsored`, and `Promoted` as disclosures with no ranking or trust bonus. Exclude Zap-controlled sales surfaces (`Zap+`, `זאפ סטור`, `רכישה בזאפ`, `shop.zap.co.il`, marketplace buy boxes) from recommendations by default.
+6. Separate regular offers from Eilat/ex-VAT, refurbished/clearance/display, and pickup-only groups. Never mix those prices into the regular delivered-price ranking.
+7. Compute VAT-inclusive all-in totals and sort them independently of page position. Offers with unknown or conditional delivery remain unranked until resolved, or appear after **all** known totals; never interleave them using product price alone.
+8. Apply the canonical seller-quality gate:
+   - exclude sellers rated below **4.0/5** from recommendations by default;
+   - mark sellers with no rating or fewer than **20 reviews in the past year** as low-confidence;
+   - retain excluded or low-confidence rows only in a clearly labelled appendix when useful;
+   - allow an explicit user preference to override these defaults.
+
+   Ratings are a filter, not a substitute for retailer-page verification. Always report both the average and recent-review count.
+9. For warranty-sensitive durable goods—including appliances, electronics, and power tools—apply § Official-importer vs parallel-import tracks above.
+10. Resolve shortlisted Zap redirects and verify the final retailer page: exact model/variant and bundle, live price and delivery, stock or purchase control, warranty duration/provider, and importer status. Classify each offer as `verified`, `mismatch/broken redirect`, `unavailable`, or `uncertain`.
+11. Rank only eligible, destination-verified, known-total offers. Cap the main table at 10 vendors unless asked.
+
+The expanded placement/verification vendor schema applies to Zap model-page results. Direct retailer commands retain their simpler result tables and add the shared importer-parity section when the durable-goods condition applies.
 
 ### Caveats
 
 - Zap's cached price can lag reality by 24+ hours — visit the vendor page before quoting.
 - Zap sometimes lists ex-VAT prices without a clear badge — verify on the vendor page.
-- Show Zap's own "Zap price" (recommendation) alongside the cheapest vendor — it reflects Zap's deal arrangements.
+- Disclose Zap's own marketplace/store offer separately and exclude it from recommendations by default; it reflects Zap's deal arrangements rather than an independent retailer result.
 
 ### When Zap misses
 

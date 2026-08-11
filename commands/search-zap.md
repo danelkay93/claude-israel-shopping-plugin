@@ -68,15 +68,9 @@ Less precise but useful when you don't know the exact product name.
    - Treat `zap choice` as a non-neutral placement/recommendation badge. It is not proof that an offer is bad or paid, but it is not an organic cheapest-price signal and earns no trust or ranking bonus. A screenshot may show a `zap choice` offer above cheaper ordinary offers.
    - Flag Zap-controlled sales separately: `Zap+`, `זאפ סטור`, `רכישה בזאפ`, `shop.zap.co.il`, `.compare-item-row-mp`, and `BuyBox[data-buybox-type="MarketPlace"]`. Exclude these house marketplace/store offers from purchase recommendations by default; if useful, show them in a separate disclosed section.
 7. **Separate sale types.** Keep regular offers apart from Eilat/ex-VAT, refurbished/clearance/display, and store-pickup-only groups. Apply rules from `data/shopping-rules.md`; do not mix their prices into the regular delivered-price ranking.
-8. **Compute and sort by all-in price.** Parse the numeric product price and delivery cost, add them, then sort ascending yourself. Sponsored/promoted status is a disclosure column, never a ranking advantage. If delivery is unknown or conditional, rank it after known totals at the same product price and state the condition.
-9. **Apply a seller-quality gate.** By default:
-   - exclude sellers rated below **4.0/5** on Zap from recommendations;
-   - mark sellers with no rating or fewer than **20 reviews in the past year** as low-confidence, even when their displayed average is high;
-   - keep excluded/low-confidence rows in a clearly labelled appendix when their price is informative;
-   - allow the user to override these thresholds.
-
-   Ratings are only a filter, not a substitute for destination-page verification. Record both the average and the recent-review count so a 5.0 based on a handful of reviews does not silently outrank a mature seller.
-10. **For appliances/electronics, build importer tracks.** Apply `docs/search-strategies.md` § Official-importer vs parallel-import tracks. Keep `יבואן רשמי`, `יבוא מקביל`, and unverified importer wording in separate buckets; do not infer official status from `יבואן מורשה`. Compare the cheapest eligible verified offer in each strict track, including price premium, warranty-month delta, named service provider, and documented service-quality differences.
+8. **Compute and sort by all-in price.** Parse the numeric product price and delivery cost, add them, then sort ascending yourself. Sponsored/promoted status is a disclosure column, never a ranking advantage. Leave offers with unknown or conditional delivery unranked until resolved, or place them after the entire known-total ranking; never interleave them based on product price alone.
+9. **Apply the canonical seller-quality gate** from `docs/search-strategies.md` § Zap. Keep excluded and low-confidence rows in a clearly labelled appendix when their price is informative, and record both the average rating and recent-review count.
+10. **For warranty-sensitive durable goods, build importer tracks.** This includes appliances, electronics, power tools, and similar products where warranty coverage materially affects value. Apply `docs/search-strategies.md` § Official-importer vs parallel-import tracks. Keep `יבואן רשמי`, `יבוא מקביל`, and unverified importer wording in separate buckets; do not infer official status from `יבואן מורשה`. Compare the cheapest eligible verified offer in each strict track, including price premium, warranty-month delta, named service provider, and documented service-quality differences.
 11. **Resolve and verify shortlisted redirects.** Navigate through each shortlisted Zap `/fs.aspx?...` link and record the final retailer URL. On the retailer page verify all of the following:
    - exact model/variant and accessory bundle
    - current price and delivery condition
@@ -106,7 +100,7 @@ Vendors found: {count}
 - Vendors not in our curated store list: ...
 - Delivery cost differences worth flagging
 
-### Importer-track parity (appliances/electronics only)
+### Importer-track parity (warranty-sensitive durable goods only)
 
 | Track | Best eligible offer | All-in ₪ | Warranty | Provider / service | Evidence |
 |---|---|---:|---|---|---|
@@ -134,9 +128,9 @@ Tell the user why Zap didn't work (new product, niche, SKU variant not indexed) 
 - Never use Zap's page order as the comparison order. Extract all rows and independently sort the VAT-inclusive all-in totals.
 - Always disclose `zap choice` and other sponsored/promoted labels. Give them no ranking or trust bonus; rank on verified total price after the seller-quality gate.
 - Exclude Zap's own store/marketplace offers from recommendations by default and disclose the conflict separately.
-- Exclude sellers rated below 4.0/5 by default. Treat fewer than 20 reviews in the past year as low-confidence rather than accepting a thin high average at face value.
-- For appliances/electronics, always split eligible offers into official-import and parallel-import tracks, with ambiguous importer wording kept unclassified. Compare warranty duration and documented service quality; never assume official import is better without evidence.
+- Apply the seller-rating thresholds defined in the canonical Zap strategy rather than maintaining separate values here.
+- For warranty-sensitive durable goods, always split eligible offers into official-import and parallel-import tracks, with ambiguous importer wording kept unclassified. Compare warranty duration and documented service quality; never assume official import is better without evidence.
 - Always verify VAT treatment on the vendor page — Zap sometimes lists ex-VAT prices without a clear badge.
-- If Zap has its own "Zap price" (recommendation), show it alongside the cheapest vendor — it reflects Zap's own deal arrangements.
+- If Zap has its own store/marketplace price, disclose it separately and exclude it from recommendations by default — it reflects Zap's own deal arrangements.
 - Cap output at 10 vendors unless the user explicitly asks for more.
 
