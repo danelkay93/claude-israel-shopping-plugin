@@ -13,7 +13,7 @@ Zap is the canonical Israeli price-comparison aggregator. One Zap search returns
 
 ## Backend
 
-Playwright MCP. Zap has bot detection; Tavily's indexed snapshots are often stale and miss the price table.
+Use a live browser session (Codex in-app Browser / Playwright). Zap has bot detection; indexed web snapshots are often stale and usually omit the seller table. Web search is discovery-only, never the authoritative source for Zap prices.
 
 ## Preflight — Hebrew term resolution
 
@@ -59,14 +59,32 @@ Less precise but useful when you don't know the exact product name.
 2. **Navigate to Zap keyword search** with the Hebrew query.
 3. **Find the right model.** Zap groups by SKU — pick the result that matches the specific model the user asked about. If unsure, list the top 3 model pages and confirm with user.
 4. **Open the model page** (`model.aspx?modelid=...`). This has the price-comparison table.
-5. **Extract the vendor table.** Each row has:
+5. **Extract every vendor row, not only the rows initially visible.** On the current model page, regular offers are represented by `.compare-item-row.product-item`; useful structured fields include `data-site-name`, `data-product-price`, `data-delivery-price`, `data-delivery-time`, ratings, reviews, warranty metadata, and the `/fs.aspx?...` destination link. Each row has:
    - Vendor name
    - Price (ILS, usually VAT-inclusive — verify)
    - Delivery info
    - Link through to the vendor listing
-6. **Check for Eilat / ex-VAT pricing.** Apply rules from `data/shopping-rules.md` — if a vendor shows an unusually low price, check for an ex-VAT or Eilat badge and use the higher regular price.
-7. **Rank low-to-high** by VAT-inclusive price.
-8. **Note vendors not in `data/israeli-stores.json`** — Zap often surfaces small specialists worth adding.
+6. **Detect non-neutral placement before ranking.** Never infer rank from vertical position. Check row/card text, accessibility labels, badges, classes, and nearby containers for Hebrew and English promotion variants, including `zap choice`, `ממומן`, `מקודם`, `מודעה`, `קידום`, `תוכן שיווקי`, `בשיתוף`, `Sponsored`, and `Promoted`.
+   - Treat `zap choice` as a non-neutral placement/recommendation badge. It is not proof that an offer is bad or paid, but it is not an organic cheapest-price signal and earns no trust or ranking bonus. A screenshot may show a `zap choice` offer above cheaper ordinary offers.
+   - Flag Zap-controlled sales separately: `Zap+`, `זאפ סטור`, `רכישה בזאפ`, `shop.zap.co.il`, `.compare-item-row-mp`, and `BuyBox[data-buybox-type="MarketPlace"]`. Exclude these house marketplace/store offers from purchase recommendations by default; if useful, show them in a separate disclosed section.
+7. **Separate sale types.** Keep regular offers apart from Eilat/ex-VAT, refurbished/clearance/display, and store-pickup-only groups. Apply rules from `data/shopping-rules.md`; do not mix their prices into the regular delivered-price ranking.
+8. **Compute and sort by all-in price.** Parse the numeric product price and delivery cost, add them, then sort ascending yourself. Sponsored/promoted status is a disclosure column, never a ranking advantage. If delivery is unknown or conditional, rank it after known totals at the same product price and state the condition.
+9. **Apply a seller-quality gate.** By default:
+   - exclude sellers rated below **4.0/5** on Zap from recommendations;
+   - mark sellers with no rating or fewer than **20 reviews in the past year** as low-confidence, even when their displayed average is high;
+   - keep excluded/low-confidence rows in a clearly labelled appendix when their price is informative;
+   - allow the user to override these thresholds.
+
+   Ratings are only a filter, not a substitute for destination-page verification. Record both the average and the recent-review count so a 5.0 based on a handful of reviews does not silently outrank a mature seller.
+10. **For appliances/electronics, build importer tracks.** Apply `docs/search-strategies.md` § Official-importer vs parallel-import tracks. Keep `יבואן רשמי`, `יבוא מקביל`, and unverified importer wording in separate buckets; do not infer official status from `יבואן מורשה`. Compare the cheapest eligible verified offer in each strict track, including price premium, warranty-month delta, named service provider, and documented service-quality differences.
+11. **Resolve and verify shortlisted redirects.** Navigate through each shortlisted Zap `/fs.aspx?...` link and record the final retailer URL. On the retailer page verify all of the following:
+   - exact model/variant and accessory bundle
+   - current price and delivery condition
+   - in-stock or active purchase control
+   - warranty duration/provider and importer status
+
+   Classify each offer as `verified`, `mismatch/broken redirect`, `unavailable`, or `uncertain`. Never recommend a row whose redirect lands on a category, a different model, or a page with no current price/purchase path.
+12. **Note vendors not in `data/israeli-stores.json`** — Zap often surfaces small specialists worth adding.
 
 ## Output
 
@@ -76,14 +94,29 @@ Hebrew query: {hebrew}
 Zap model page: {url}
 Vendors found: {count}
 
-| # | Price (₪, inc. VAT) | Vendor | Delivery | Link |
-|---|---------------------|--------|----------|------|
-| 1 | ...                 | ...    | ...      | ...  |
+| # | All-in price (₪, inc. VAT) | Vendor | Rating / recent reviews | Placement | Verification | Delivery | Link |
+|---|-------------------------------|--------|-------------------------|-----------|--------------|----------|------|
+| 1 | ...                           | ...    | 4.6 / 42                | Organic / zap choice / Zap house marketplace | Verified / broken / unavailable / uncertain | ... | ... |
 
 ### Notes
 - Any VAT adjustments applied
+- Promotion labels observed (quote the exact label); if none were visible, say so rather than assuming the rows are organic
+- Seller-quality threshold used and sellers excluded for low/insufficient ratings
+- Offers excluded because their Zap redirect was broken, mismatched, or unavailable
 - Vendors not in our curated store list: ...
 - Delivery cost differences worth flagging
+
+### Importer-track parity (appliances/electronics only)
+
+| Track | Best eligible offer | All-in ₪ | Warranty | Provider / service | Evidence |
+|---|---|---:|---|---|---|
+| Official importer | ... | ... | ... months | ... | exact `יבואן רשמי` wording/source |
+| Parallel import | ... | ... | ... months | ... | exact `יבוא מקביל` wording/source |
+
+- Official-import premium: ₪... (...%)
+- Warranty-duration delta: ... months
+- Documented service-quality delta: ... / unknown
+- Unverified importer-status offers: ...
 ```
 
 ## When Zap misses
@@ -98,6 +131,12 @@ Tell the user why Zap didn't work (new product, niche, SKU variant not indexed) 
 ## Rules
 
 - Never quote Zap prices without visiting the vendor page — Zap's cached price can lag reality by 24+ hours.
+- Never use Zap's page order as the comparison order. Extract all rows and independently sort the VAT-inclusive all-in totals.
+- Always disclose `zap choice` and other sponsored/promoted labels. Give them no ranking or trust bonus; rank on verified total price after the seller-quality gate.
+- Exclude Zap's own store/marketplace offers from recommendations by default and disclose the conflict separately.
+- Exclude sellers rated below 4.0/5 by default. Treat fewer than 20 reviews in the past year as low-confidence rather than accepting a thin high average at face value.
+- For appliances/electronics, always split eligible offers into official-import and parallel-import tracks, with ambiguous importer wording kept unclassified. Compare warranty duration and documented service quality; never assume official import is better without evidence.
 - Always verify VAT treatment on the vendor page — Zap sometimes lists ex-VAT prices without a clear badge.
 - If Zap has its own "Zap price" (recommendation), show it alongside the cheapest vendor — it reflects Zap's own deal arrangements.
 - Cap output at 10 vendors unless the user explicitly asks for more.
+
